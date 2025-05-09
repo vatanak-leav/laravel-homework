@@ -1,83 +1,65 @@
 <?php
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\Student;
 use App\Models\Teacher;
 
+// ==== STUDENT ROUTES ====
+Route::get('/students', fn() => response()->json(Student::allStudents()));
 
-// >>>===== STUDENT =====<<<
-
-Route::get('/students', function () {
-    return response()->json(Student::all());
-});
-
-Route::get('/students/{id}', function ($id) {
-    $student = Student::find($id);
-    return $student ? response()->json($student) : response()->json(['error' => 'Student not found'], 404);
-});
+Route::get('/students/{id}', fn($id) =>
+    ($student = Student::findStudent($id)) ? response()->json($student) : response()->json(['error' => 'Not found'], 404)
+);
 
 Route::post('/students', function (Request $request) {
-    if (Student::exists($request->id)) {
-        return response()->json(['error' => 'Student ID already exists'], 400);
-    }
-    Student::add($request->all());
+    $request->validate([
+        'name' => 'required|string',
+        'age' => 'required|integer',
+        'gender' => 'required|string',
+        'grade' => 'required|string',
+    ]);
+    Student::addStudent($request->all());
     return response()->json(['message' => 'Student added']);
 });
 
 Route::patch('/students/{id}', function (Request $request, $id) {
-    if (!Student::find($id)) {
-        return response()->json(['error' => 'Student ID not found'], 404);
-    }
-
-    Student::update($id, $request->all());
+    if (!Student::findStudent($id)) return response()->json(['error' => 'Not found'], 404);
+    Student::updateStudent($id, $request->all());
     return response()->json(['message' => 'Student updated']);
 });
 
-
 Route::delete('/students/{id}', function ($id) {
-    if (!Student::find($id)) {
-        return response()->json(['error' => 'Student not found'], 404);
-    }
-    Student::delete($id);
+    if (!Student::findStudent($id)) return response()->json(['error' => 'Not found'], 404);
+    Student::deleteStudent($id);
     return response()->json(['message' => 'Student deleted']);
 });
 
 
-// >>>===== TEACHER =====<<<
+// ==== TEACHER ROUTES ====
+Route::get('/teachers', fn() => response()->json(Teacher::allTeachers()));
 
-Route::get('/teachers', function () {
-    return response()->json(Teacher::all());
-});
-
-Route::get('/teachers/{id}', function ($id) {
-    $teacher = Teacher::find($id);
-    return $teacher ? response()->json($teacher) : response()->json(['error' => 'Teacher not found'], 404);
-});
+Route::get('/teachers/{id}', fn($id) =>
+    ($teacher = Teacher::findTeacher($id)) ? response()->json($teacher) : response()->json(['error' => 'Not found'], 404)
+);
 
 Route::post('/teachers', function (Request $request) {
-    if (Teacher::exists($request->id)) {
-        return response()->json(['error' => 'Teacher ID already exists'], 400);
-    }
-    Teacher::add($request->all());
+    $request->validate([
+        'name' => 'required|string',
+        'age' => 'required|integer',
+        'gender' => 'required|string',
+    ]);
+    Teacher::addTeacher($request->all());
     return response()->json(['message' => 'Teacher added']);
 });
 
 Route::patch('/teachers/{id}', function (Request $request, $id) {
-    if (!Teacher::find($id)) {
-        return response()->json(['error' => 'Teacher not found'], 404);
-    }
-
-    Teacher::update($id, $request->all());
+    if (!Teacher::findTeacher($id)) return response()->json(['error' => 'Not found'], 404);
+    Teacher::updateTeacher($id, $request->all());
     return response()->json(['message' => 'Teacher updated']);
 });
 
-
 Route::delete('/teachers/{id}', function ($id) {
-    if (!Teacher::find($id)) {
-        return response()->json(['error' => 'Teacher not found'], 404);
-    }
-
-    Teacher::delete($id);
+    if (!Teacher::findTeacher($id)) return response()->json(['error' => 'Not found'], 404);
+    Teacher::deleteTeacher($id);
     return response()->json(['message' => 'Teacher deleted']);
 });

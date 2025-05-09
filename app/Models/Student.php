@@ -3,47 +3,34 @@
 
 namespace App\Models;
 
-class Student {
-    public static $students = [
-        [
-            'id' => 1,
-            'name' => 'Leav Sovatanak',
-            'age' => 21,
-            'gender' => 'Male',
-            'grade' => 'E'
-        ]
-    ];
+use Illuminate\Support\Facades\DB;
 
-    public static function all() {
-        return self::$students;
+class Student
+{
+    public static function allStudents() {
+        return DB::select("SELECT * FROM students");
     }
 
-    public static function find($id) {
-        foreach (self::$students as $student) {
-            if ($student['id'] == $id) {
-                return $student;
-            }
-        }
-        return null;
+    public static function findStudent($id) {
+        $result = DB::select("SELECT * FROM students WHERE id = ?", [$id]);
+        return $result ? $result[0] : null;
     }
 
-    public static function exists($id) {
-        return collect(self::$students)->contains('id', $id);
+    public static function addStudent($data) {
+        return DB::insert(
+            "INSERT INTO students (name, age, gender, grade) VALUES (?, ?, ?, ?)",
+            [$data['name'], $data['age'], $data['gender'], $data['grade']]
+        );
     }
 
-    public static function add($data) {
-        self::$students[] = $data;
+    public static function updateStudent($id, $data) {
+        return DB::update(
+            "UPDATE students SET name = ?, age = ?, gender = ?, grade = ? WHERE id = ?",
+            [$data['name'], $data['age'], $data['gender'], $data['grade'], $id]
+        );
     }
 
-    public static function update($id, $data) {
-        foreach (self::$students as $index => $s) {
-            if ($s['id'] == $id) {
-                self::$students[$index] = array_merge($s, $data);
-            }
-        }
-    }
-
-    public static function delete($id) {
-        self::$students = array_filter(self::$students, fn($s) => $s['id'] != $id);
+    public static function deleteStudent($id) {
+        return DB::delete("DELETE FROM students WHERE id = ?", [$id]);
     }
 }

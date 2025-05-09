@@ -2,46 +2,34 @@
 
 namespace App\Models;
 
-class Teacher {
-    public static $teachers = [
-        [
-            'id' => 1,
-            'name' => 'John Doe',
-            'age' => 40,
-            'gender' => 'Male'
-        ]
-    ];
+use Illuminate\Support\Facades\DB;
 
-    public static function all() {
-        return self::$teachers;
+class Teacher
+{
+    public static function allTeachers() {
+        return DB::select("SELECT * FROM teachers");
     }
 
-    public static function find($id) {
-        foreach (self::$teachers as $teacher) {
-            if ($teacher['id'] == $id) {
-                return $teacher;
-            }
-        }
-        return null;
+    public static function findTeacher($id) {
+        $result = DB::select("SELECT * FROM teachers WHERE id = ?", [$id]);
+        return $result ? $result[0] : null;
     }
 
-    public static function exists($id) {
-        return collect(self::$teachers)->contains('id', $id);
+    public static function addTeacher($data) {
+        return DB::insert(
+            "INSERT INTO teachers (name, age, gender) VALUES (?, ?, ?)",
+            [$data['name'], $data['age'], $data['gender']]
+        );
     }
 
-    public static function add($data) {
-        self::$teachers[] = $data;
+    public static function updateTeacher($id, $data) {
+        return DB::update(
+            "UPDATE teachers SET name = ?, age = ?, gender = ? WHERE id = ?",
+            [$data['name'], $data['age'], $data['gender'], $id]
+        );
     }
 
-    public static function update($id, $data) {
-        foreach (self::$teachers as $index => $t) {
-            if ($t['id'] == $id) {
-                self::$teachers[$index] = array_merge($t, $data);
-            }
-        }
-    }
-
-    public static function delete($id) {
-        self::$teachers = array_filter(self::$teachers, fn($t) => $t['id'] != $id);
+    public static function deleteTeacher($id) {
+        return DB::delete("DELETE FROM teachers WHERE id = ?", [$id]);
     }
 }
